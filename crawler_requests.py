@@ -1,10 +1,5 @@
 # encoding = 'utf-8'
-
-##################################################
-### For Python 3.0 or later -- requests module ###
-##################################################
 import requests
-
 
 user = 'rg3'
 user_url = 'https://api.github.com/users/' + user + '/repos'

@@ -16,7 +16,7 @@ def spearman(x, y):
 
     """
 
-    # Check inputs
+    # check inputs
     if (not x or len(x) == 1 or len(x) != len(y)):
         raise ValueError('Invalid input lists.')
 
@@ -49,7 +49,7 @@ def kendall(x, y):
 
     """
 
-    # Check inputs
+    # check inputs
     if (not x or len(x) == 1 or len(x) != len(y)):
         raise ValueError('Invalid input lists.')
 
@@ -73,8 +73,20 @@ def kendall(x, y):
 
 
 def rank_of_list(lst):
+    """
+    Rank the list.
+
+    Parameters
+    ----------
+    lst : input list
+           
+    Returns
+    -------
+    rankList : a list
+
+    """
 	
-    # Check inputs
+    # check input
     if not lst:
         raise ValueError('Empty input list.')
 
@@ -87,7 +99,8 @@ def rank_of_list(lst):
     n = 1
     for i in indices:
         rankList[i] = n
-        n = n + 1
+        n += 1
+
     return(rankList)	
 
 
