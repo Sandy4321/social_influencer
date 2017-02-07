@@ -53,7 +53,7 @@ def kendall(x, y):
 	concordant = discordant = 0
 
 	sorted_order = np.argsort(x)  
-	new_x = np.array(x)[sorted_order] 
+	new_x = np.array(x)[sorted_order] 	
 	new_y = np.array(y)[sorted_order] 
 
 	for i in range(n - 1):
