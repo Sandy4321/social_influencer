@@ -21,7 +21,7 @@ def spearman(x, y):
 		raise ValueError('Invalid input lists.')
 
 
-	n = len(x)
+ 	n = len(x)
 	diff = 0.0
 	for i in range(n):
 		diff += (x[i] - y[i])**2	
