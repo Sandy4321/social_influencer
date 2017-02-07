@@ -32,22 +32,21 @@ def top30_users():
 ######### Get the repositories of users ##########
 ##################################################
 def getRepos(userList, mode = 'o'):
-	if not userList:
-		print('It\'s an empty user list.')
-		raise TypeError
+    if not userList:
+        raise TypeError('It\'s an empty user list.')
 
-	for index in userList:
-		if index >= userNum:
-			print('The user index: %d is out of range.' % (index))
-			raise IndexError	
+    for index in userList:
+        if index >= userNum:
+            print('The user index: %d is out of range.' % (index))
+            raise IndexError	
 
-	N = len(userList)
-	repoList = list()
-	fname = 'Python_dataset/user_info.json'	
-	try:
-		fhand = open(fname, 'r')
-		lists = json.load(fhand)
-	except:
+    N = len(userList)
+    repoList = list()
+    fname = 'Python_dataset/user_info.json'	
+    try:
+        fhand = open(fname, 'r')
+        lists = json.load(fhand)
+    except:
 		print('Could not read file', fname)
 		raise OSError
 	else:	
