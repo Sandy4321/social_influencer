@@ -2,7 +2,7 @@
 import numpy as np
 
 def spearman(x, y):
-	"""
+    """
     Calculates a Spearman rank-order correlation coefficient.
 
     Parameters
@@ -16,22 +16,28 @@ def spearman(x, y):
 
     """
 
-	# Check inputs
-	if (not x or len(x) == 1 or len(x) != len(y)):
-		raise ValueError('Invalid input lists.')
+    # Check inputs
+    if (not x or len(x) == 1 or len(x) != len(y)):
+        raise ValueError('Invalid input lists.')
 
-
+<<<<<<< Updated upstream
  	n = len(x)
 	diff = 0.0
 	for i in range(n):
 		diff += (x[i] - y[i])**2	
+=======
+    n = len(x)
+    diff = 0.0
+    for i in range(n):
+        diff += (x[i] - y[i])**2	
+>>>>>>> Stashed changes
 
-	return(1.0 - 6.0 * diff / (n * (n**2 - 1.0)))
+    return(1.0 - 6.0 * diff / (n * (n**2 - 1.0)))
 
 
 
 def kendall(x, y):
-	"""
+    """
     Calculates a Kendall rank-order correlation coefficient.
 
     Parameters
@@ -45,26 +51,32 @@ def kendall(x, y):
 
     """
 
-	# Check inputs
-	if (not x or len(x) == 1 or len(x) != len(y)):
-		raise ValueError('Invalid input lists.')
+    # Check inputs
+    if (not x or len(x) == 1 or len(x) != len(y)):
+        raise ValueError('Invalid input lists.')
 
-	n = len(x)	 
-	concordant = discordant = 0
+    n = len(x)	 
+    concordant = discordant = 0
 
+<<<<<<< Updated upstream
 	sorted_order = np.argsort(x)  
 	new_x = np.array(x)[sorted_order] 	
 	new_y = np.array(y)[sorted_order] 
+=======
+    sorted_order = np.argsort(x)  
+    new_x = np.array(x)[sorted_order] 
+    new_y = np.array(y)[sorted_order] 
+>>>>>>> Stashed changes
 
-	for i in range(n - 1):
-		count = 0
-		for j in range(i + 1, n):
-			if new_y[j] > new_y[i]:
-				count += 1 
-		concordant += count
-		discordant += n - (i + 1) - count
+    for i in range(n - 1):
+        count = 0
+        for j in range(i + 1, n):
+            if new_y[j] > new_y[i]:
+                count += 1 
+        concordant += count
+        discordant += n - (i + 1) - count
 
-	return((concordant - discordant) / (0.5 * n * (n - 1)))	
+    return((concordant - discordant) / (0.5 * n * (n - 1)))	
 
 
 
