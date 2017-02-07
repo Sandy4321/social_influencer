@@ -20,17 +20,15 @@ def spearman(x, y):
     if (not x or len(x) == 1 or len(x) != len(y)):
         raise ValueError('Invalid input lists.')
 
-<<<<<<< Updated upstream
- 	n = len(x)
-	diff = 0.0
-	for i in range(n):
-		diff += (x[i] - y[i])**2	
-=======
     n = len(x)
     diff = 0.0
     for i in range(n):
         diff += (x[i] - y[i])**2	
->>>>>>> Stashed changes
+
+    n = len(x)
+    diff = 0.0
+    for i in range(n):
+        diff += (x[i] - y[i])**2	
 
     return(1.0 - 6.0 * diff / (n * (n**2 - 1.0)))
 
@@ -58,15 +56,9 @@ def kendall(x, y):
     n = len(x)	 
     concordant = discordant = 0
 
-<<<<<<< Updated upstream
-	sorted_order = np.argsort(x)  
-	new_x = np.array(x)[sorted_order] 	
-	new_y = np.array(y)[sorted_order] 
-=======
     sorted_order = np.argsort(x)  
-    new_x = np.array(x)[sorted_order] 
+    new_x = np.array(x)[sorted_order] 	
     new_y = np.array(y)[sorted_order] 
->>>>>>> Stashed changes
 
     for i in range(n - 1):
         count = 0
@@ -82,21 +74,21 @@ def kendall(x, y):
 
 def rank_of_list(lst):
 	
-	# Check inputs
-	if not lst:
-		raise ValueError('Empty input list.')
+    # Check inputs
+    if not lst:
+        raise ValueError('Empty input list.')
 
-	rankList = [0 for x in range(len(lst))]
-	indices = list(range(len(lst)))
+    rankList = [0 for x in range(len(lst))]
+    indices = list(range(len(lst)))
 
-	# sort the position of elements
-	indices.sort(key = lambda x: lst[x], reverse = True)   
+    # sort the position of elements
+    indices.sort(key = lambda x: lst[x], reverse = True)   
 
-	n = 1
-	for i in indices:
-		rankList[i] = n
-		n = n + 1
-	return(rankList)	
+    n = 1
+    for i in indices:
+        rankList[i] = n
+        n = n + 1
+    return(rankList)	
 
 
 
