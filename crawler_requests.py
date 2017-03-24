@@ -45,8 +45,8 @@ def get_json(url):
 		else:	
 			return(response.json())
 
-dataset_path = '/Users/DerekChiang/Documents/Github repo/social_influencer/Java_dataset/6273/'
-fname = dataset_path + 'top30-award.txt'
+# dataset_path = '/Users/DerekChiang/Documents/Github repo/social_influencer/Java_dataset/6273/'
+# fname = dataset_path + 'top30-award.txt'
 # try:
 # 	fhand = open(fname, 'r')
 # except:
@@ -72,7 +72,8 @@ fname = dataset_path + 'top30-award.txt'
 # 			outfile.write(top30[i] + '\n')
 # 			print(followers[i])
 # 	print('Saved')		
-
-
+url = 'https://api.github.com/repos/DerekChiangTW/social_influencer/commits'
+lists = get_json(url)
+print(len(lists))
 
 

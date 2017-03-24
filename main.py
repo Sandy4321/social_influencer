@@ -23,30 +23,29 @@ def getBaselines(userList):
 		raise TypeError('It\'s an empty user list.')
 
 	userNum = len(userList)
-	truth = [x + 1 for x in range(userNum)]	
+	truth = [x + 1 for x in range(userNum)]
 
 	# initialize a table to save the results
 	header = ['', 'spearman', 'kendall']
 	table = list()
 	table.append(header)
-	
 
 	# load repositories information
-	fname = dataset_path + 'repo_info.json'	
+	fname = dataset_path + 'repo_info.json'
 	try:
 		fhand = open(fname, 'r')
 		repo_dicts = json.load(fhand)
 	except:
-		print('Could not read file', fname)	
+		print('Could not read file', fname)
 
 
 	# load user information
-	fname = dataset_path + 'user_info.json'	
+	fname = dataset_path + 'user_info.json'
 	try:
 		fhand = open(fname, 'r')
 		user_dicts = json.load(fhand)
 	except:
-		print('Could not read file', fname)	
+		print('Could not read file', fname)
 
 
 	# Baseline 1: # Owned repositories (binary)
@@ -54,11 +53,11 @@ def getBaselines(userList):
 		repoList = get_userInfo(userList, dataset_path, mode = 'o')
 		# print([len(x) for x in repoList])
 	except:
-		print('Fail to load the repositories of users.')	
+		print('Fail to load the repositories of users.')
 	else:
 		own = rank_of_list([len(i) for i in repoList])
 		table.append(['Owned', "{0:.6f}".format(spearman(truth, own)), "{0:.6f}".format(kendall(truth, own))])
-					
+
 	# Baseline 1: # Owned repositories (weighted)
 	owned_c = [0 for x in range(userNum)]
 	owned_cb = [0 for x in range(userNum)]
