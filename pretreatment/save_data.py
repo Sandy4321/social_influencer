@@ -1,4 +1,6 @@
-#coding = utf-8
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+
 import re
 import sys
 import json
@@ -215,11 +217,16 @@ def save_repoInfo(dataset_path):
     outfile.closed
     print("The repo_info.json file is written and saved.")
 
+def main():
+    print('The dataset you are saving is', dataset_path)
+    mode = input("What to save? ['u' for userinfo, 'r' for repoinfo]\n")
+    if mode == "u":
+        save_userInfo(dataset_path)
+    elif mode == "r":    
+        save_repoInfo(dataset_path)
+    else:
+        print("Invalid file to save.")
+if __name__ == '__main__':
+    main()
 
-##################################################
-################## Main command ##################
-##################################################
-
-# save_userInfo(dataset_path)
-# save_repoInfo(dataset_path)
-
+    
