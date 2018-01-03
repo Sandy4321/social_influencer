@@ -12,4 +12,4 @@ In addition, interesting analyses and discussions on the results are also provid
 <img src='./images/Procedure.pdf' height=250>
 
 ## Results
-<img src='./images/API.pdf' height=350>
+<img src='./images/API.png' height=350>
