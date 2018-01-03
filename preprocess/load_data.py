@@ -4,274 +4,221 @@
 import re
 import json
 
-def load_allusers(dataset_path):
-    """
-    Load all users in the dataset.    
-    """
-    fname = dataset_path + 'userList.txt'
-    try:
-        fhand = open(fname, 'r')
-    except:
-        print('Could not load all users of the dataset', dataset_path)
-    else:
-        users = list()
-        for line in fhand:
-            name = line.rstrip()
-            users.append(name)
-        return users
+user_re = re.compile("^[^\(]+")
 
 
-def load_top30users(dataset_path, truth = 's'):
-	"""
-    Return the top 30 users according to the chosen dataset and ground truth
+def get_file_content(path):
+    """ Store every line of the file in a list and return it. """
+    return [line.rstrip() for line in open(path, 'r')]
+
+
+def load_all_users(path):
+    """ Load all users from the specified dataset. """
+    return get_file_content(path + "userList.txt")
+
+
+def load_top30_users(path, rank='s'):
+    """ Return the top 30 users from the specified dataset.
 
     @Parameters
-    ----------
-    dataset_path : the path of the chosen dataset
+    -----------
+    path : string
+        The path of the dataset.
 
-    truth = 's' : set ground truth as the # of stars (default)
-            'a' : set ground truth as the rankings on Git award
-            'f' : set ground truth as the # of followers
+    rank : string
+        The method to rank the developers on Github.
+        's' : # of total repository stars (default)
+        'a' : the rank on Git award website
+        'f' : # of total followers
 
-    @Return
-    -------
-    top30 : a top 30 user list
+    @Returns
+    --------
+    users : list
+        A top 30 user list.
 
     """
 
-    # initialization
-	top30 = list()
-	
-	# check the setting of ground truth
-	file = str()
-	if truth == 's':
-		file = 'top30-stars.txt'
-	elif truth == 'a':
-		file = 'top30-award.txt'
-	elif truth == 'f':
-		file = 'top30-followers.txt'
-	else:
-		print('Invalid ground truth mode', truth)
+    # Check the rank method
+    if rank == 's':
+        path += 'top30-stars.txt'
+    elif rank == 'a':
+        path += 'top30-award.txt'
+    elif rank == 'f':
+        path += 'top30-followers.txt'
 
-	# return the top 30 user list 
-	fname = dataset_path + file
-	try:
-		fhand = open(fname, 'r')
-	except:
-		print('Could not load top30 users', fname)
-	else:
-		for line in fhand:
-			name = line.rstrip()
-			top30.append(name)
-		fhand.close()
-		return(top30)
+    return get_file_content(path)
 
 
-def get_userInfo(userList, dataset_path, mode = 'o'):
-	"""
-    Get user information from the user_info.json file
+def get_user_info(user_list, path, mode='o'):
+    """ Get the user information.
 
     @Parameters
-    ----------
-    userList : input user list
+    -----------
+    user_list : list
+        The input user list.
 
-    dataset_path : the path of the chosen dataset                
+    path : string
+        The path of the dataset.
 
-    mode = 'o' : owned repositories of users
-           'w' : written repositories of users
-           'c' : # of commits of users           
+    mode = string
+        The user information you want to return.
+        'o' : owned repositories of users (default)
+        'w' : written repositories of users
+        'c' : # of commits of users
 
-    @Return
-    -------
-    returnList : a list
+    @Returns
+    --------
+    info_list : list
+        The returned information of users.
+
+    """
+    user_dict = json.load(open(path + "user_info.json", 'r'))
+
+    # Check if all the users exist
+    for user in user_list:
+        if user not in user_dict:
+            raise ValueError('Could not find user', user)
+
+    # Check the target information
+    target = ""
+    if mode == 'o':
+        target = "owned repos"
+    elif mode == 'w':
+        target = "written repos"
+    elif mode == 'c':
+        target = "commits"
+
+    info_list = [user_dict[user][target] for user in user_list]
+    return info_list
+
+
+def get_repo_info(repo_list, path, mode='c'):
+    """ Get repository information.
+
+    @Parameters
+    -----------
+    repo_list : list
+        The input repo list.
+
+    path : string
+        The path of the dataset.
+
+    mode : string
+        The repository information you want to return.
+        'c' : # of commits of repo (default)
+        'cb' : # of contributors of repo
+        'f' : # of forks of repo
+        'w' : # of watchers of repo
+        's' : # of stars of repo
+
+    @Returns
+    --------
+    info_ist : list
+        The returned information of repositories.
 
     """
 
-	# initialization
-	N = len(userList)
-	returnList = list()
+    repo_dict = json.load(open(path + 'repo_info.json', 'r'))
 
-	# open file user_info.json
-	fname = dataset_path + 'user_info.json'
-	try:
-		fhand = open(fname, 'r')
-		user_dict = json.load(fhand)
-	except:
-		print('Could not read file', fname)
-	else:
-		# check if all the users in userList exist
-		for user in userList:
-			if user not in user_dict:
-				print('Could not find user', user)
-				break
-		else:
-			if mode == 'o':
-				for user in userList:
-					returnList.append(user_dict[user]['owned repos'])
-			elif mode == 'w':
-				for user in userList:
-					returnList.append(user_dict[user]['written repos'])
-			elif mode == 'c':
-				for user in userList:
-					returnList.append(user_dict[user]['commits'])	
-			else:
-				raise ValueError('Invalid mode.', mode)
-	finally:
-		fhand.close()
-		return(returnList)
+    # Check if all the repositories exist
+    for repo in repo_list:
+        if repo not in repo_dict:
+            raise ValueError('Could not find repo', repo)
+
+    # Check the target information
+    target = ""
+    if mode == 'c':
+        target = "commits"
+    elif mode == 'cb':
+        target = "contributors"
+    elif mode == 'f':
+        target = "forks"
+    elif mode == 'w':
+        target = "watchers"
+    elif mode == 's':
+        target = "stars"
+
+    info_list = [repo_dict[repo][target] for repo in repo_list]
+    return info_list
 
 
+def get_collaborators(user_list, path):
+    """ Find the collaborators of users.
 
-def get_collaborators(userList, dataset_path):
-	"""
-    Find the collaborators of users
+    @Parameters
+    -----------
+    user_list : list
+        The input user list.
 
-    Parameters
-    ----------
-    userList : input user list
+    path : string
+        The path of the dataset.
 
-    dataset_path : the path of the chosen dataset           
-
-    Return
-    -------
-    collabList : a list
+    @Returns
+    --------
+    collab_list : list
+        The collaborators of each user.
 
     """
 
-	try: 
-		repoList = get_userInfo(userList, dataset_path, mode = 'w')
-	except:
-		print('Could not find the repolist of users', userList)
-	else:			
-		N = len(userList)
-		collabList = [set() for x in range(N)]	
+    N = len(user_list)
+    collab_list = [set() for x in range(N)]
 
-		
-		fname = dataset_path + 'commitLog.txt'
-		try:
-			fhand = open(fname, 'r')
-		except:
-			print('Could not read file', fname)
-		else:	
-			for line in fhand:
-				line = line.rstrip()
-				x = line.split()
+    # Get the written repositories of all users
+    written_repo_list = get_user_info(user_list, path, mode='w')
 
-				user_wo_id = re.findall('(^.*)\(', x[0])
-				user = user_wo_id[0]
-				repo = x[1]
-				for i in range(N):
-					if (repo in repoList[i] and user != userList[i]):
-						collabList[i].add(user)
-		finally:			
-			fhand.close()
-			return(collabList)
+    fhand = open(path + 'commitLog.txt', 'r')
+    for line in fhand:
+        log = line.split()
+        m = re.search(user_re, log[0])
+
+        user = m.group(0)
+        repo = log[1]
+        for i in range(N):
+            if repo in written_repo_list[i] and user != user_list[i]:
+                collab_list[i].add(user)
+
+    return(collab_list)
 
 
-def get_relatedRepos(userList, dataset_path):
-	"""
-    Find the related repositories of users
+def get_related_repos(user_list, path):
+    """ Find the related repositories of users.
 
-    Parameters
-    ----------
-    userList : input user list
+    @Parameters
+    -----------
+    user_list : list
+        The input user list.
 
-    dataset_path : the path of the chosen dataset               
+    path : string
+        The path of the dataset.
 
-    Return
-    -------
-    relatedList : a list
+    @Returns
+    --------
+    related_repo_list : list
+        The related repositories of each user.
 
     """
 
-	try: 
-		repoList = get_userInfo(userList, dataset_path, mode = 'w')
-		collabList = get_collaborators(userList, dataset_path)
-	except:
-		print('Could not find the repolist or collabList of users', userList)		
-	else:	
-		N = len(userList)
-		relatedList = [set() for x in range(N)]
+    N = len(user_list)
+    related_list = [set() for x in range(N)]
 
-		fname = dataset_path + 'commitLog.txt'
-		try:
-			fhand = open(fname, 'r')
-		except:
-			print('Could not read file', fname)
-		else:
-			for line in fhand:
-				line = line.rstrip()
-				x = line.split()
+    repo_list = get_user_info(user_list, path, mode='w')
+    collab_list = get_collaborators(user_list, path)
 
-				user_wo_id = re.findall('(^.*)\(', x[0])
-				user = user_wo_id[0]
-				repo = x[1]
-				for i in range(N):
-					if (user in collabList[i] and repo not in repoList[i]):
-						relatedList[i].add(repo)
-		finally:			
-			fhand.close()
-			return(relatedList)
+    fhand = open(path + 'commitLog.txt', 'r')
+    for line in fhand:
+        log = line.split()
+        m = re.search(user_re, log[0])
+
+        user = m.group(0)
+        repo = log[1]
+        for i in range(N):
+            if (user in collab_list[i] and repo not in repo_list[i]):
+                related_list[i].add(repo)
+
+    return(related_list)
 
 
-
-def get_repoInfo(repoList, dataset_path, mode = 'c'):
-	"""
-    Get repo information from the repo_info.json file
-
-    Parameters
-    ----------
-    repoList : input repo list
-
-    dataset_path : the path of the chosen dataset  
-
-    mode = 'c' : # of commits of repo
-           'cb' : # of contributors of repo
-           'f' : # of forks of repo
-           'w' : # of watchers of repo
-           's' : # of stars of repo   
-
-    Return
-    -------
-    returnList : a list
-
-    """
-
-	# initialization
-	N = len(repoList)
-	returnList = list()
-
-	# open file repo_info.json
-	fname = dataset_path + 'repo_info.json'	
-	try:
-		fhand = open(fname, 'r')
-		repo_dict = json.load(fhand)
-	except:
-		print('Could not read file', fname)
-	else:
-		for repo in repoList:
-			if not repo in repo_dict:
-				print('Could not find repo', repo)
-				break
-		else:		
-			if mode == 'c':
-				for index in repoList:
-					returnList.append(lists[index]['commits'])	
-			elif mode == 'cb':
-				for index in repoList:
-					returnList.append(lists[index]['contributors'])	
-			elif mode == 'f':
-				for index in repoList:
-					returnList.append(lists[index]['forks'])			
-			elif mode == 'w':
-				for index in repoList:	
-					returnList.append(lists[index]['watchers'])	
-			elif mode == 's':
-				for index in repoList:
-					returnList.append(lists[index]['stars'])					
-			else:
-				raise ValueError('Invalid mode.', mode)		
-	finally:
-		fhand.close()
-		return(returnList)
-
+if __name__ == "__main__":
+    s = "A-Circle-Zhang(11173242) ykdl(832666) 1"
+    m = re.search(user_re, s)
+    print(m.group(0))
