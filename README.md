@@ -9,7 +9,9 @@ In addition, interesting analyses and discussions on the results are also provid
 
 
 ## Method
-<img src='./images/Procedure.pdf' height=250>
+<img src='./images/Procedure.png' height=250>
 
 ## Results
+The top 10 weighted Python modules learned from our model are listed in Figure. 
+Interestingly, the web development-related modules are the major ones in the table, probably due to the fact the top-ranked contributors focus their development efforts on web-related projects.
 <img src='./images/API.png' height=350>
