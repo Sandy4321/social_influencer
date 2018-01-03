@@ -1,232 +1,134 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 import re
-import sys
+import os
 import json
 
-proj_path = '/Users/DerekChiang/Documents/Github repo/social_influencer/'
+dirpath = os.getcwd() + '/../data/'
 datasets = ['Python_dataset/21631/', 'Python_dataset/55326/', 'Java_dataset/6273/']
-dataset_path = proj_path + datasets[2]
+data_path = dirpath + datasets[0]
 
 
-def save_userInfo(dataset_path):
-    """
-    Save user information in user_info.json file
-
-    """
-
-    # initialize a dict to save the information of users
-    dicts = dict()
+def save_user_info(path):
+    """ Save user information into json format. """
 
     # Load user name and id
-    fname = dataset_path + 'userList.json'
-    try: 
-        fhand = open(fname, 'r')
-        id_dict = json.load(fhand) 
-    except:
-        print('Could not read file', fname)
-    else:
-        for user, _id in id_dict.items():
-            dicts[user] = dict()
-            dicts[user]['id'] = _id 
-            dicts[user]['written repos'] = dict()   
-            dicts[user]['owned repos'] = list() 
-            dicts[user]['commits'] = 0
-        fhand.close()
+    id_dict = json.load(open(path + 'userList.json', 'r'))
 
+    # Initialize user information
+    user_info = dict()
+    for user, id_num in id_dict.items():
+        user_info[user] = {
+            "id": id_num,
+            "written repos": dict(),
+            "owned repos": list(),
+            "commits": 0
+        }
 
-    # load user owned repositories
-    fname = dataset_path + 'repoList.txt'
-    try:
-        fhand = open(fname, 'r')
-    except:
-        print('Could not read file', fname)
-    else:   
-        for line in fhand:
-            line = line.rstrip()
-            ownerlist = re.findall('(^.*)/', line)
-            repolist = re.findall('/(.*)', line)
-            if len(ownerlist) == 1 and len(repolist) == 1:
-                owner = ownerlist[0]
-                repo = repolist[0]
+    # Load user owned repositories
+    fhand = open(path + 'repoList.txt', 'r')
+    for line in fhand:
+        owner = re.findall('(^.*)/', line)[0]
+        repo = re.findall('/(.*)', line)[0]
 
-                if not owner in id_dict:
-                    print('Could not find user', owner)
-                else:    
-                    repo_name = repo + '(' + str(id_dict[owner]) + ')'
-                    if owner in dicts:
-                       dicts[owner]['owned repos'].append(repo_name)
-                    else:
-                        print('Could not find owner', owner) 
-            else:
-                print('Invalid format in repoList.txt', line)   
+        if owner not in id_dict:
+            print('Could not find user', owner)
+        else:
+            repo_name = repo + '(' + str(id_dict[owner]) + ')'
+            user_info[owner]['owned repos'].append(repo_name)
 
-        fhand.close()
+    # Load user written repositories
+    fhand = open(path + 'commitLog.txt', 'r')
+    for line in fhand:
+        log = line.split()
+        user = re.findall('(^.*)\(', log[0])[0]
+        id_num = int(re.findall('\((.*?)\)', log[0])[0])
+        repo = log[1]
+        commit = int(log[2])
 
+        if user in user_info and user_info[user]['id'] == id_num:
+            user_info[user]['written repos'][repo] = commit
+            user_info[user]['commits'] += commit
 
-    # load user written repositories
-    fname = dataset_path + 'commitLog.txt'
-    try:
-        fhand = open(fname, 'r')
-    except:
-        print('Could not read file', fname)
-    else:    
-        for line in fhand:
-            line = line.rstrip()
-            x = line.split()
-            user_wo_id = re.findall('(^.*)\(', x[0])
-            user_id = re.findall('\((.*?)\)', x[0])
-            
-            user = user_wo_id[0]
-            id_num = int(user_id[0])
-            repo = x[1]
-            commit = int(x[2])
-
-            if user in dicts and dicts[user]['id'] == id_num:
-                dicts[user]['written repos'][repo] = commit
-                dicts[user]['commits'] += commit
-            else:
-                print('Wrong user', user)    
-        fhand.close()
-
-    fhand.close()    
-
-
-    # Save file 'user_info.json'  
-    with open(dataset_path + 'user_info.json', 'w') as outfile:
-        json.dump(dicts, outfile, indent = 4, sort_keys = True, separators = (',', ':'))
-    outfile.closed    
+    # Save information into "user_info.json" file
+    with open(path + "user_info.json", 'w') as outfile:
+        json.dump(user_info, outfile, indent=4, sort_keys=True, separators=(',', ':'))
+    outfile.closed
     print("The user_info.json file is written and saved.")
 
 
-
-def save_repoInfo(dataset_path):
-    """
-    Save repo information in repo_info.json file
-
-    """
-
-    # initialize a dict to save the information of repos
-    dicts = dict()
-
+def save_repo_info(path):
+    """ Save repo information into json format. """
 
     # Load user name and id
-    fname = dataset_path + 'userList.json'
-    try: 
-        fhand = open(fname, 'r')
-        id_dict = json.load(fhand) 
-    except:
-        print('Could not read file', fname)
-    else:
-        fhand.close()
+    id_dict = json.load(open(path + 'userList.json', 'r'))
 
+    # Initialize a dict to store repository information
+    repo_info = dict()
+    fhand = open(path + 'repoList.txt', 'r')
+    for line in fhand:
+        owner = re.findall('(^.*)/', line)[0]
+        repo_name = re.findall('/(.*)', line)[0]
+        if owner not in id_dict:
+            print('Could not find user', owner)
+        else:
+            repo = {
+                'repo_name': repo_name,
+                'owner': owner,
+                'contributors': list(),
+                'commits': 0,
+                'id': id_dict[owner]
+            }
+            repo_full_name = repo_name + '(' + str(id_dict[owner]) + ')'
+            repo_info[repo_full_name] = repo
 
-    # load repositories
-    fname = dataset_path + 'repoList.txt'
-    try:
-        fhand = open(fname, 'r')
-    except:
-        print('Could not read file', fname)
-    else:   
-        for line in fhand:
-            line = line.rstrip()
-            ownerlist = re.findall('(^.*)/', line)
-            repolist = re.findall('/(.*)', line)
-
-            if len(ownerlist) == 1 and len(repolist) == 1:
-                owner = ownerlist[0]
-                repo = repolist[0]
-
-                if not owner in id_dict:
-                    print('Could not find user', owner)
-                else:    
-                    repo_info = dict()
-                    repo_info['repo_name'] = repo
-                    repo_info['owner'] = owner
-                    repo_info['contributors'] = list()
-                    repo_info['commits'] = 0
-                    repo_info['id'] = id_dict[owner]
-                    repo_name = repo + '(' + str(id_dict[owner]) + ')'
-                    dicts[repo_name] = repo_info    
+    # Load repo information
+    fhand = open(path + 'repos_info.txt', 'r')
+    for line in fhand:
+        owner = re.findall('(^.*)/', line)
+        repo = re.findall('/(.*?):', line)
+        star = re.findall(':(.*?),', line)
+        fork = re.findall(',(.*?),', line)
+        watch = re.findall('^.*,(.*)', line)
+        if all(len(x) == 1 for x in (owner, repo, star, fork, watch)):
+            if owner[0] not in id_dict:
+                print('Could not find user', owner[0])
             else:
-                print('Invalid format in repoList.txt', line)   
-
-        fhand.close()
-
-
-    # load repo info
-    fname = dataset_path + 'repos_info.txt'
-    try:
-        fhand = open(fname, 'r')
-    except:
-        print('Could not read file', fname)
-    else:   
-        for line in fhand:
-            owner = re.findall('(^.*)/', line)
-            repo = re.findall('/(.*?):', line)
-            star = re.findall(':(.*?),', line)
-            fork = re.findall(',(.*?),', line)
-            watch = re.findall('^.*,(.*)', line)
-            if all(len(x) == 1 for x in (owner, repo, star, fork, watch)): 
-                if not owner[0] in id_dict:
-                    print('Could not find user', owner[0])
+                id_string = str(id_dict[owner[0]])
+                repo_name = repo[0] + '(' + id_string + ')'
+                if repo_name in repo_info:
+                    repo_info[repo_name]['stars'] = int(star[0])
+                    repo_info[repo_name]['forks'] = int(fork[0])
+                    repo_info[repo_name]['watchers'] = int(watch[0])
                 else:
-                    id_string = str(id_dict[owner[0]])
-                    repo_name = repo[0] + '(' + id_string + ')'
-                    if repo_name in dicts:
-                        dicts[repo_name]['stars'] = int(star[0])
-                        dicts[repo_name]['forks'] = int(fork[0])
-                        dicts[repo_name]['watchers'] = int(watch[0])
-                    else:
-                        print('Could not find repo', repo_name)    
-            else:
-                print('Invalid format in repos_info.txt', line)   
+                    print('Could not find repo', repo_name)
+        else:
+            print('Invalid format in repos_info.txt', line)
 
-        fhand.close()
+    # Load contributors and commits of repos
+    fhand = open(path + 'commitLog.txt', 'r')
+    for line in fhand:
+        log = line.split()
+        user = re.findall('(^.*)\(', log[0])[0]
+        repo = log[1]
+        commit = int(log[2])
+        if repo in repo_info:
+            repo_info[repo]['contributors'].append(user)
+            repo_info[repo]['commits'] += commit
 
-
-    # load contributors and commits of repos
-    fname = dataset_path + 'commitLog.txt'
-    try:
-        fhand = open(fname, 'r')
-    except:
-        print('Could not read file', fname)
-    else:    
-        for line in fhand:
-            line = line.rstrip()
-            x = line.split()
-            user_wo_id = re.findall('(^.*)\(', x[0])
-            user_id = re.findall('\((.*?)\)', x[0])
-            
-            user = user_wo_id[0]
-            id_num = int(user_id[0])
-            repo = x[1]
-            commit = int(x[2])
-
-            if repo in dicts:
-                dicts[repo]['contributors'].append(user)    
-                dicts[repo]['commits'] += commit
-            else:
-                print('Wrong repo', repo)    
-        fhand.close() 
-
-    # Save file 'repo_info.json'    SkinSprite
-    with open(dataset_path + 'repo_info.json', 'w') as outfile:
-        json.dump(dicts, outfile, indent = 4, sort_keys = True, separators = (',', ':'))
+    # Save information into "repo_info.json" file
+    with open(path + 'repo_info.json', 'w') as outfile:
+        json.dump(repo_info, outfile, indent=4, sort_keys=True, separators=(',', ':'))
     outfile.closed
     print("The repo_info.json file is written and saved.")
 
+
 def main():
-    print('The dataset you are saving is', dataset_path)
-    mode = input("What to save? ['u' for userinfo, 'r' for repoinfo]\n")
-    if mode == "u":
-        save_userInfo(dataset_path)
-    elif mode == "r":    
-        save_repoInfo(dataset_path)
-    else:
-        print("Invalid file to save.")
+    print('The dataset you are saving is', data_path)
+    # save_user_info(data_path)
+    # save_repo_info(data_path)
+
+
 if __name__ == '__main__':
     main()
-
-    
